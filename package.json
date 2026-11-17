@@ -10,5 +10,8 @@
     "start": "node server.mjs",
     "test": "node tests/hotel.test.mjs",
     "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.8"
   }
 }
