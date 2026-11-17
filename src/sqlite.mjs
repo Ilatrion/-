@@ -1,0 +1,1 @@
+export function adapter(sql){return{prepare(query){return{bind(...args){return{first:async()=>sql.prepare(query).get(...args),run:async()=>({meta:{changes:sql.prepare(query).run(...args).changes}})}},first:async()=>sql.prepare(query).get(),run:async()=>({meta:{changes:sql.prepare(query).run().changes}})}}}}

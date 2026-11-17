@@ -1,0 +1,10 @@
+import {readFileSync,writeFileSync,mkdirSync,readdirSync,statSync,cpSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {dirname,join} from 'node:path';
+const root=dirname(dirname(fileURLToPath(import.meta.url)));const assets={};
+const types={html:'text/html; charset=utf-8',css:'text/css; charset=utf-8',js:'text/javascript; charset=utf-8',jpg:'image/jpeg',svg:'image/svg+xml'};
+function collect(dir,prefix=''){for(const n of readdirSync(dir)){const p=join(dir,n);if(statSync(p).isDirectory())collect(p,prefix+n+'/');else assets[prefix+n]={base64:readFileSync(p).toString('base64'),type:types[n.split('.').at(-1)]??'application/octet-stream'}}}collect(join(root,'public'));
+const engine=readFileSync(join(root,'src/engine.mjs'),'utf8');const service=readFileSync(join(root,'src/service.mjs'),'utf8').replace(/^import .*from '\.\/engine\.mjs';\n/,'');
+mkdirSync(join(root,'dist/server'),{recursive:true});mkdirSync(join(root,'dist/.openai'),{recursive:true});
+const code=engine+'\n'+service+'\nconst ASSET_DATA='+JSON.stringify(assets)+';\nconst ASSETS=Object.fromEntries(Object.entries(ASSET_DATA).map(([k,v])=>[k,{type:v.type,bytes:Uint8Array.from(atob(v.base64),c=>c.charCodeAt(0))}]));\nexport default {fetch(request,env){return handle(request,env,ASSETS)}};\n';
+writeFileSync(join(root,'dist/server/index.js'),code);cpSync(join(root,'.openai/hosting.json'),join(root,'dist/.openai/hosting.json'));cpSync(join(root,'drizzle'),join(root,'dist/drizzle'),{recursive:true});console.log('Worker собран: dist/server/index.js; статика включена в модуль.');

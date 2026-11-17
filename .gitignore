@@ -1,0 +1,9 @@
+data/
+outputs/
+dist/
+.env*
+.dev.vars*
+.sites-runtime/
+node_modules/
+*.log
+pages/
